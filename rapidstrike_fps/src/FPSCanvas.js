@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useCallback } from "react";
-import { Canvas, useThree } from "@react-three/fiber";
+import { Canvas, useThree, useFrame } from "@react-three/fiber";
 import { PointerLockControls, Sky, Environment } from "@react-three/drei";
 import * as THREE from "three";
 
