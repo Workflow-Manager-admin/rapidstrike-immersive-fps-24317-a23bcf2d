@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-
+import FPSCanvas from './FPSCanvas';
 // PUBLIC_INTERFACE
 function RapidStrikeContainer() {
   /**
@@ -41,31 +41,8 @@ function RapidStrikeContainer() {
         width: "100vw", height: "100vh", background: colors.lightBg, position: "relative", fontFamily: "'Inter', sans-serif", overflow: "hidden"
       }}
     >
-      {/* 3D Game View Placeholder */}
-      <div
-        className="game-3d-view"
-        style={{
-          width: "100vw",
-          height: "100vh",
-          background: `linear-gradient(120deg, ${colors.primary} 60%, ${colors.secondary} 100%)`,
-        }}
-      >
-        <div style={{
-          position: "absolute",
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%,-50%)",
-          color: "#fff",
-          fontSize: "2.5rem",
-          opacity: 0.22,
-          letterSpacing: "0.15em",
-          pointerEvents: "none",
-          userSelect: "none"
-        }}>
-          {/* Placeholder for embedded 3D Canvas/WebGL */}
-          RAPIDSTRIKE – 3D VIEW
-        </div>
-      </div>
+      {/* 3D FPS Game View */}
+      <FPSCanvas />
 
       {/* Minimal HUD */}
       <div
