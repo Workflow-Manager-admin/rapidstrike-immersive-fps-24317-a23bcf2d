@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useCallback } from "react";
+import React, { useRef, useEffect, useCallback, useState } from "react";
 import { Canvas, useThree, useFrame } from "@react-three/fiber";
 import { PointerLockControls, Sky } from "@react-three/drei";
 import * as THREE from "three";
@@ -8,8 +8,8 @@ import * as THREE from "three";
  * Handles WASD movement and mouse look,
  * using react-three-fiber and PointerLockControls for pointer capture.
  */
-function FPSController({ movementSpeed = 4 }) { // Lower speed to realistic 3-5 units/sec (default 4)
-  const { camera, gl } = useThree();
+function FPSController({ movementSpeed = 4 }) {
+  const { camera } = useThree();
   const velocity = useRef(new THREE.Vector3());
   const direction = useRef(new THREE.Vector3());
   const move = useRef({ forward: false, backward: false, left: false, right: false });
@@ -62,7 +62,6 @@ function FPSController({ movementSpeed = 4 }) { // Lower speed to realistic 3-5 
     }
   }, []);
 
-  // Attach key listeners
   useEffect(() => {
     document.addEventListener("keydown", onKeyDown);
     document.addEventListener("keyup", onKeyUp);
@@ -72,7 +71,6 @@ function FPSController({ movementSpeed = 4 }) { // Lower speed to realistic 3-5 
     };
   }, [onKeyDown, onKeyUp]);
 
-  // Animate FPS movement
   useFrame(() => {
     const time = performance.now();
     const delta = (time - prevTime.current) / 1000;
@@ -81,11 +79,8 @@ function FPSController({ movementSpeed = 4 }) { // Lower speed to realistic 3-5 
     velocity.current.z -= velocity.current.z * 8.0 * delta;
 
     direction.current.z = Number(move.current.forward) - Number(move.current.backward);
-
-    // Invert strafe (x) direction logic so 'A' moves left, 'D' moves right (A = left = negative X)
-    // If strafe felt reversed, multiply by -1 here
     direction.current.x = (Number(move.current.right) - Number(move.current.left)) * -1;
-    direction.current.normalize(); // Ensure consistent movement
+    direction.current.normalize();
 
     if (move.current.forward || move.current.backward) {
       velocity.current.z -= direction.current.z * movementSpeed * delta;
@@ -94,25 +89,169 @@ function FPSController({ movementSpeed = 4 }) { // Lower speed to realistic 3-5 
       velocity.current.x -= direction.current.x * movementSpeed * delta;
     }
 
-    // Move camera (locked to ground, y=1.75)
     camera.position.x += velocity.current.x;
     camera.position.z += velocity.current.z;
-    camera.position.y = 1.75; // up/down is locked for this FPS demo (no jump/crouch)
+    camera.position.y = 1.75;
 
     prevTime.current = time;
   });
 
-  // Setup PointerLock controls - for mouse look
-  // (handled automatically by drei's PointerLockControls)
   return <PointerLockControls selector="#fps-canvas-root" />;
+}
+
+// --- FPS WEAPON FIRING SYSTEM ---
+
+/**
+ * BulletProjectile renders a fast-moving bullet object from given start position and direction.
+ * Handles its forward animation and removal when out of range.
+ * Optionally, can include collision detection logic (future expansion).
+ */
+function BulletProjectile({ start, direction, speed = 21, life = 1.4, onExpire, color = "#ffd700" }) {
+  const meshRef = useRef();
+  const [alive, setAlive] = useState(true);
+  const spawnTime = useRef(performance.now());
+
+  const pos = useRef(new THREE.Vector3(...start));
+  const dir = useRef(direction.clone());
+
+  useFrame(() => {
+    if (!alive) return;
+    const now = performance.now();
+    const delta = (now - spawnTime.current) / 1000.0;
+
+    const move = dir.current.clone().normalize().multiplyScalar(speed * (1/60));
+    pos.current.add(move);
+
+    if (meshRef.current) {
+      meshRef.current.position.copy(pos.current);
+    }
+
+    if (delta > life) {
+      setAlive(false);
+      if (onExpire) onExpire();
+    }
+  });
+
+  if (!alive) return null;
+  return (
+    <mesh ref={meshRef} position={pos.current.toArray()} castShadow>
+      <sphereGeometry args={[0.09, 11, 11]} />
+      <meshStandardMaterial emissive={color} color={color} metalness={0.7} roughness={0.10} />
+    </mesh>
+  );
+}
+
+/**
+ * MuzzleFlash briefly renders a bright effect at the weapon/center for firing feedback.
+ */
+function MuzzleFlash({ show, position, direction }) {
+  if (!show) return null;
+  const forwardOffset = direction.clone().setLength(0.38);
+  const flashPos = position.clone().add(forwardOffset);
+
+  return (
+    <mesh position={flashPos.toArray()} rotation={[0, 0, 0]}>
+      <planeGeometry args={[0.34, 0.16]} />
+      <meshBasicMaterial color="#FFFACD" transparent opacity={0.73} />
+    </mesh>
+  );
+}
+
+/**
+ * FPSWeapon handles weapon logic: firing projectiles, muzzle flash, and input controls.
+ * Cleans up previous projectiles, supports click-to-fire and spacebar.
+ */
+function FPSWeapon({ getCamera }) {
+  const [projectiles, setProjectiles] = useState([]);
+  const [muzzleFlash, setMuzzleFlash] = useState(false);
+
+  // PUBLIC_INTERFACE
+  const fireWeapon = useCallback(() => {
+    if (!getCamera) return;
+    const camera = getCamera();
+    const dir = new THREE.Vector3();
+    camera.getWorldDirection(dir);
+
+    const start = [camera.position.x, camera.position.y, camera.position.z];
+    setProjectiles(arr => [
+      ...arr,
+      {
+        key: Math.random().toString(32).slice(2) + Date.now(),
+        start,
+        direction: dir.clone(),
+      },
+    ]);
+    setMuzzleFlash(true);
+    setTimeout(() => {
+      setMuzzleFlash(false);
+    }, 65);
+  }, [getCamera]);
+
+  useEffect(() => {
+    function handleInput(e) {
+      if (
+        (e.type === "mousedown" && e.button === 0) ||
+        (e.type === "keydown" && (e.code === "Space" || e.code === "KeyF"))
+      ) {
+        fireWeapon();
+      }
+    }
+    window.addEventListener("mousedown", handleInput);
+    window.addEventListener("keydown", handleInput);
+    return () => {
+      window.removeEventListener("mousedown", handleInput);
+      window.removeEventListener("keydown", handleInput);
+    };
+  }, [fireWeapon]);
+
+  const onProjectileExpire = (k) => {
+    setProjectiles(arr => arr.filter(p => p.key !== k));
+  };
+
+  const { camera } = useThree();
+
+  return (
+    <>
+      {projectiles.map(proj =>
+        <BulletProjectile
+          key={proj.key}
+          start={proj.start}
+          direction={proj.direction}
+          onExpire={() => onProjectileExpire(proj.key)}
+        />
+      )}
+      <MuzzleFlash
+        show={muzzleFlash}
+        position={camera.position}
+        direction={(() => {
+          const d = new THREE.Vector3();
+          camera.getWorldDirection(d);
+          return d;
+        })()}
+      />
+    </>
+  );
 }
 
 // PUBLIC_INTERFACE
 /**
- * FPSCanvas renders the 3D environment and FPS controls.
+ * FPSCanvas renders the 3D environment and FPS controls, and now supports weapon firing.
  */
 export default function FPSCanvas() {
-  // R3F Canvas takes full parent size. PointerLockControls handles mouse look.
+  // Acquire camera reference for weapon ambient logic (projectile spawn, view direction)
+  const cameraRef = useRef();
+  const getCamera = useCallback(() => {
+    return cameraRef.current;
+  }, []);
+  // CameraRig connects r3f's active camera to our ref
+  const CameraRig = () => {
+    const { camera } = useThree();
+    useEffect(() => {
+      cameraRef.current = camera;
+    }, [camera]);
+    return null;
+  };
+
   return (
     <div id="fps-canvas-root" style={{width: "100vw", height: "100vh", position: "absolute", inset: 0, zIndex: 1 }}>
       <Canvas
@@ -121,10 +260,13 @@ export default function FPSCanvas() {
         gl={{ antialias: true }}
         shadows
       >
+        <CameraRig />
         {/* Skybox */}
         <Sky sunPosition={[100, 40, 100]} turbidity={8} rayleigh={6} mieCoefficient={0.015} />
         {/* FPS controller: WASD + mouse look */}
         <FPSController />
+        {/* Gun/projectile logic */}
+        <FPSWeapon getCamera={getCamera} />
         {/* Ground */}
         <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
           <planeGeometry args={[64, 64]} />
