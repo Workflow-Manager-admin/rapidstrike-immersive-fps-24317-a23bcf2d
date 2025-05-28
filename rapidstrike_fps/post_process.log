@@ -18,3 +18,5 @@ npm WARN deprecated q@1.5.1: You or someone you depend on is using Q, the JavaSc
 npm WARN deprecated 
 npm WARN deprecated (For a CapTP with native promises, see @endo/eventual-send and @endo/captp)
 npm WARN deprecated sourcemap-codec@1.4.8: Please use @jridgewell/sourcemap-codec instead
+npm WARN deprecated workbox-cacheable-response@6.6.0: workbox-background-sync@6.6.0
+npm WARN deprecated workbox-google-analytics@6.6.0: It is not compatible with newer versions of GA starting with v4, as long as you are using GAv3 it should be ok, but the package is not longer being maintained
