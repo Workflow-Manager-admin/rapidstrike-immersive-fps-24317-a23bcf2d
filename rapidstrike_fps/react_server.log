@@ -19,3 +19,75 @@ To create a production build, use npm run build.
 
 webpack compiled successfully
 Compiling...
+Failed to compile.
+
+[eslint] 
+src/RapidStrikeContainer.js
+Syntax error: Unexpected token, expected "}" (198:6) (198:6)
+ERROR in ./src/RapidStrikeContainer.js
+Module build failed (from ./node_modules/babel-loader/lib/index.js):
+SyntaxError: /home/kavia/workspace/code-generation/rapidstrike-immersive-fps-24317-a23bcf2d/rapidstrike_fps/src/RapidStrikeContainer.js: Unexpected token, expected "}" (198:6)
+
+  196 |           </div>
+  197 |         </OverlayModal>
+> 198 |       )}
+      |       ^
+  199 |
+  200 |       {/* Main menu overlay (shown when not in-game, future implementation) */}
+  201 |       {/* <MainMenu /> */}
+    at constructor (/home/kavia/workspace/code-generation/rapidstrike-immersive-fps-24317-a23bcf2d/rapidstrike_fps/node_modules/@babel/parser/lib/index.js:360:19)
+    at FlowParserMixin.raise (/home/kavia/workspace/code-generation/rapidstrike-immersive-fps-24317-a23bcf2d/rapidstrike_fps/node_modules/@babel/parser/lib/index.js:3327:19)
+    at FlowParserMixin.unexpected (/home/kavia/workspace/code-generation/rapidstrike-immersive-fps-24317-a23bcf2d/rapidstrike_fps/node_modules/@babel/parser/lib/index.js:3347:16)
+    at FlowParserMixin.expect (/home/kavia/workspace/code-generation/rapidstrike-immersive-fps-24317-a23bcf2d/rapidstrike_fps/node_modules/@babel/parser/lib/index.js:3657:12)
+    at FlowParserMixin.jsxParseExpressionContainer (/home/kavia/workspace/code-generation/rapidstrike-immersive-fps-24317-a23bcf2d/rapidstrike_fps/node_modules/@babel/parser/lib/index.js:6810:10)
+    at FlowParserMixin.jsxParseElementAt (/home/kavia/workspace/code-generation/rapidstrike-immersive-fps-24317-a23bcf2d/rapidstrike_fps/node_modules/@babel/parser/lib/index.js:6884:36)
+    at FlowParserMixin.jsxParseElement (/home/kavia/workspace/code-generation/rapidstrike-immersive-fps-24317-a23bcf2d/rapidstrike_fps/node_modules/@babel/parser/lib/index.js:6922:17)
+    at FlowParserMixin.parseExprAtom (/home/kavia/workspace/code-generation/rapidstrike-immersive-fps-24317-a23bcf2d/rapidstrike_fps/node_modules/@babel/parser/lib/index.js:6932:19)
+    at FlowParserMixin.parseExprSubscripts (/home/kavia/workspace/code-generation/rapidstrike-immersive-fps-24317-a23bcf2d/rapidstrike_fps/node_modules/@babel/parser/lib/index.js:10758:23)
+    at FlowParserMixin.parseUpdate (/home/kavia/workspace/code-generation/rapidstrike-immersive-fps-24317-a23bcf2d/rapidstrike_fps/node_modules/@babel/parser/lib/index.js:10743:21)
+    at FlowParserMixin.parseMaybeUnary (/home/kavia/workspace/code-generation/rapidstrike-immersive-fps-24317-a23bcf2d/rapidstrike_fps/node_modules/@babel/parser/lib/index.js:10723:23)
+    at FlowParserMixin.parseMaybeUnaryOrPrivate (/home/kavia/workspace/code-generation/rapidstrike-immersive-fps-24317-a23bcf2d/rapidstrike_fps/node_modules/@babel/parser/lib/index.js:10576:61)
+    at FlowParserMixin.parseExprOps (/home/kavia/workspace/code-generation/rapidstrike-immersive-fps-24317-a23bcf2d/rapidstrike_fps/node_modules/@babel/parser/lib/index.js:10581:23)
+    at FlowParserMixin.parseMaybeConditional (/home/kavia/workspace/code-generation/rapidstrike-immersive-fps-24317-a23bcf2d/rapidstrike_fps/node_modules/@babel/parser/lib/index.js:10558:23)
+    at FlowParserMixin.parseMaybeAssign (/home/kavia/workspace/code-generation/rapidstrike-immersive-fps-24317-a23bcf2d/rapidstrike_fps/node_modules/@babel/parser/lib/index.js:10521:21)
+    at /home/kavia/workspace/code-generation/rapidstrike-immersive-fps-24317-a23bcf2d/rapidstrike_fps/node_modules/@babel/parser/lib/index.js:5722:39
+    at FlowParserMixin.tryParse (/home/kavia/workspace/code-generation/rapidstrike-immersive-fps-24317-a23bcf2d/rapidstrike_fps/node_modules/@babel/parser/lib/index.js:3665:20)
+    at FlowParserMixin.parseMaybeAssign (/home/kavia/workspace/code-generation/rapidstrike-immersive-fps-24317-a23bcf2d/rapidstrike_fps/node_modules/@babel/parser/lib/index.js:5722:18)
+    at /home/kavia/workspace/code-generation/rapidstrike-immersive-fps-24317-a23bcf2d/rapidstrike_fps/node_modules/@babel/parser/lib/index.js:10491:39
+    at FlowParserMixin.allowInAnd (/home/kavia/workspace/code-generation/rapidstrike-immersive-fps-24317-a23bcf2d/rapidstrike_fps/node_modules/@babel/parser/lib/index.js:12100:12)
+    at FlowParserMixin.parseMaybeAssignAllowIn (/home/kavia/workspace/code-generation/rapidstrike-immersive-fps-24317-a23bcf2d/rapidstrike_fps/node_modules/@babel/parser/lib/index.js:10491:17)
+    at FlowParserMixin.parseParenAndDistinguishExpression (/home/kavia/workspace/code-generation/rapidstrike-immersive-fps-24317-a23bcf2d/rapidstrike_fps/node_modules/@babel/parser/lib/index.js:11359:28)
+    at FlowParserMixin.parseParenAndDistinguishExpression (/home/kavia/workspace/code-generation/rapidstrike-immersive-fps-24317-a23bcf2d/rapidstrike_fps/node_modules/@babel/parser/lib/index.js:5815:18)
+    at FlowParserMixin.parseExprAtom (/home/kavia/workspace/code-generation/rapidstrike-immersive-fps-24317-a23bcf2d/rapidstrike_fps/node_modules/@babel/parser/lib/index.js:11006:23)
+    at FlowParserMixin.parseExprAtom (/home/kavia/workspace/code-generation/rapidstrike-immersive-fps-24317-a23bcf2d/rapidstrike_fps/node_modules/@babel/parser/lib/index.js:6937:20)
+    at FlowParserMixin.parseExprSubscripts (/home/kavia/workspace/code-generation/rapidstrike-immersive-fps-24317-a23bcf2d/rapidstrike_fps/node_modules/@babel/parser/lib/index.js:10758:23)
+    at FlowParserMixin.parseUpdate (/home/kavia/workspace/code-generation/rapidstrike-immersive-fps-24317-a23bcf2d/rapidstrike_fps/node_modules/@babel/parser/lib/index.js:10743:21)
+    at FlowParserMixin.parseMaybeUnary (/home/kavia/workspace/code-generation/rapidstrike-immersive-fps-24317-a23bcf2d/rapidstrike_fps/node_modules/@babel/parser/lib/index.js:10723:23)
+    at FlowParserMixin.parseMaybeUnaryOrPrivate (/home/kavia/workspace/code-generation/rapidstrike-immersive-fps-24317-a23bcf2d/rapidstrike_fps/node_modules/@babel/parser/lib/index.js:10576:61)
+    at FlowParserMixin.parseExprOps (/home/kavia/workspace/code-generation/rapidstrike-immersive-fps-24317-a23bcf2d/rapidstrike_fps/node_modules/@babel/parser/lib/index.js:10581:23)
+    at FlowParserMixin.parseMaybeConditional (/home/kavia/workspace/code-generation/rapidstrike-immersive-fps-24317-a23bcf2d/rapidstrike_fps/node_modules/@babel/parser/lib/index.js:10558:23)
+    at FlowParserMixin.parseMaybeAssign (/home/kavia/workspace/code-generation/rapidstrike-immersive-fps-24317-a23bcf2d/rapidstrike_fps/node_modules/@babel/parser/lib/index.js:10521:21)
+    at FlowParserMixin.parseMaybeAssign (/home/kavia/workspace/code-generation/rapidstrike-immersive-fps-24317-a23bcf2d/rapidstrike_fps/node_modules/@babel/parser/lib/index.js:5773:18)
+    at FlowParserMixin.parseExpressionBase (/home/kavia/workspace/code-generation/rapidstrike-immersive-fps-24317-a23bcf2d/rapidstrike_fps/node_modules/@babel/parser/lib/index.js:10475:23)
+    at /home/kavia/workspace/code-generation/rapidstrike-immersive-fps-24317-a23bcf2d/rapidstrike_fps/node_modules/@babel/parser/lib/index.js:10471:39
+    at FlowParserMixin.allowInAnd (/home/kavia/workspace/code-generation/rapidstrike-immersive-fps-24317-a23bcf2d/rapidstrike_fps/node_modules/@babel/parser/lib/index.js:12095:16)
+    at FlowParserMixin.parseExpression (/home/kavia/workspace/code-generation/rapidstrike-immersive-fps-24317-a23bcf2d/rapidstrike_fps/node_modules/@babel/parser/lib/index.js:10471:17)
+    at FlowParserMixin.parseReturnStatement (/home/kavia/workspace/code-generation/rapidstrike-immersive-fps-24317-a23bcf2d/rapidstrike_fps/node_modules/@babel/parser/lib/index.js:12786:28)
+    at FlowParserMixin.parseStatementContent (/home/kavia/workspace/code-generation/rapidstrike-immersive-fps-24317-a23bcf2d/rapidstrike_fps/node_modules/@babel/parser/lib/index.js:12437:21)
+    at FlowParserMixin.parseStatementLike (/home/kavia/workspace/code-generation/rapidstrike-immersive-fps-24317-a23bcf2d/rapidstrike_fps/node_modules/@babel/parser/lib/index.js:12406:17)
+    at FlowParserMixin.parseStatementLike (/home/kavia/workspace/code-generation/rapidstrike-immersive-fps-24317-a23bcf2d/rapidstrike_fps/node_modules/@babel/parser/lib/index.js:5140:24)
+    at FlowParserMixin.parseStatementListItem (/home/kavia/workspace/code-generation/rapidstrike-immersive-fps-24317-a23bcf2d/rapidstrike_fps/node_modules/@babel/parser/lib/index.js:12386:17)
+    at FlowParserMixin.parseBlockOrModuleBlockBody (/home/kavia/workspace/code-generation/rapidstrike-immersive-fps-24317-a23bcf2d/rapidstrike_fps/node_modules/@babel/parser/lib/index.js:12960:61)
+    at FlowParserMixin.parseBlockBody (/home/kavia/workspace/code-generation/rapidstrike-immersive-fps-24317-a23bcf2d/rapidstrike_fps/node_modules/@babel/parser/lib/index.js:12953:10)
+    at FlowParserMixin.parseBlock (/home/kavia/workspace/code-generation/rapidstrike-immersive-fps-24317-a23bcf2d/rapidstrike_fps/node_modules/@babel/parser/lib/index.js:12941:10)
+    at FlowParserMixin.parseFunctionBody (/home/kavia/workspace/code-generation/rapidstrike-immersive-fps-24317-a23bcf2d/rapidstrike_fps/node_modules/@babel/parser/lib/index.js:11783:24)
+    at FlowParserMixin.parseFunctionBody (/home/kavia/workspace/code-generation/rapidstrike-immersive-fps-24317-a23bcf2d/rapidstrike_fps/node_modules/@babel/parser/lib/index.js:5117:11)
+    at FlowParserMixin.parseFunctionBodyAndFinish (/home/kavia/workspace/code-generation/rapidstrike-immersive-fps-24317-a23bcf2d/rapidstrike_fps/node_modules/@babel/parser/lib/index.js:11769:10)
+    at FlowParserMixin.parseFunctionBodyAndFinish (/home/kavia/workspace/code-generation/rapidstrike-immersive-fps-24317-a23bcf2d/rapidstrike_fps/node_modules/@babel/parser/lib/index.js:5125:18)
+    at /home/kavia/workspace/code-generation/rapidstrike-immersive-fps-24317-a23bcf2d/rapidstrike_fps/node_modules/@babel/parser/lib/index.js:13085:12
+
+ERROR in [eslint] 
+src/RapidStrikeContainer.js
+  Line 198:6:  Parsing error: Unexpected token, expected "}" (198:6)
+
+webpack compiled with 2 errors
