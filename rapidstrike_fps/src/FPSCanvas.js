@@ -211,14 +211,37 @@ function FpsTarget({ id, position, size = [1, 2, 1], color = "#e7cf41", onHit, s
 /**
  * FPSWeapon handles weapon logic: firing projectiles, muzzle flash, and input controls,
  * and emits projectiles with knowledge of possible targets for hit detection.
+ * 
+ * Now supports ammo management and reload.
  */
-function FPSWeapon({ getCamera, targets, onTargetHit }) {
+function FPSWeapon({
+  getCamera,
+  targets,
+  onTargetHit,
+  ammo,
+  maxAmmo,
+  reserveAmmo,
+  onAmmoChange,
+  isReloading,
+  setIsReloading,
+  reloadTimeMs = 950, // ms for reload animation
+}) {
   const [projectiles, setProjectiles] = useState([]);
   const [muzzleFlash, setMuzzleFlash] = useState(false);
+  const lastShotRef = useRef(0);
 
   // PUBLIC_INTERFACE
-  const fireWeapon = useCallback(() => {
+  const tryFireWeapon = useCallback(() => {
+    // Don't fire if reloading or no ammo available
+    if (isReloading) return;
+    if (ammo <= 0) return;
     if (!getCamera) return;
+    const now = performance.now();
+    // Prevent ultra-fast autofire spam
+    if (now - lastShotRef.current < 110) return;
+    lastShotRef.current = now;
+    // Decrement ammo
+    if (onAmmoChange) onAmmoChange(ammo - 1, reserveAmmo);
     const camera = getCamera();
     const dir = new THREE.Vector3();
     camera.getWorldDirection(dir);
@@ -233,18 +256,37 @@ function FPSWeapon({ getCamera, targets, onTargetHit }) {
       },
     ]);
     setMuzzleFlash(true);
-    setTimeout(() => {
-      setMuzzleFlash(false);
-    }, 65);
-  }, [getCamera]);
+    setTimeout(() => setMuzzleFlash(false), 65);
+  }, [ammo, getCamera, isReloading, onAmmoChange, reserveAmmo]);
 
+  // PUBLIC_INTERFACE
+  const tryReloadWeapon = useCallback(() => {
+    // Already full or no reserves or already reloading
+    if (isReloading) return;
+    if (ammo === maxAmmo) return;
+    if (reserveAmmo === 0) return;
+    setIsReloading(true);
+    setTimeout(() => {
+      // Compute how much can be loaded
+      const needed = maxAmmo - ammo;
+      const toLoad = Math.min(needed, reserveAmmo);
+      if (onAmmoChange) onAmmoChange(ammo + toLoad, reserveAmmo - toLoad);
+      setIsReloading(false);
+    }, reloadTimeMs);
+  }, [ammo, maxAmmo, reserveAmmo, isReloading, setIsReloading, onAmmoChange, reloadTimeMs]);
+
+  // Input: LMB or F/Space fires, R reloads (block input if reloading)
   useEffect(() => {
     function handleInput(e) {
+      if (isReloading) return;
       if (
         (e.type === "mousedown" && e.button === 0) ||
         (e.type === "keydown" && (e.code === "Space" || e.code === "KeyF"))
       ) {
-        fireWeapon();
+        tryFireWeapon();
+      }
+      if (e.type === "keydown" && e.code === "KeyR") {
+        tryReloadWeapon();
       }
     }
     window.addEventListener("mousedown", handleInput);
@@ -253,7 +295,7 @@ function FPSWeapon({ getCamera, targets, onTargetHit }) {
       window.removeEventListener("mousedown", handleInput);
       window.removeEventListener("keydown", handleInput);
     };
-  }, [fireWeapon]);
+  }, [tryFireWeapon, tryReloadWeapon, isReloading]);
 
   const onProjectileExpire = (k) => {
     setProjectiles(arr => arr.filter(p => p.key !== k));
