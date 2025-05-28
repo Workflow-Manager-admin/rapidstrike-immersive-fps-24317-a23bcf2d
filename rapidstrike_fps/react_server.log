@@ -91,3 +91,6 @@ src/RapidStrikeContainer.js
   Line 198:6:  Parsing error: Unexpected token, expected "}" (198:6)
 
 webpack compiled with 2 errors
+Compiling...
+Compiled successfully!
+webpack compiled successfully

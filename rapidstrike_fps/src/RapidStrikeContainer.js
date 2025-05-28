@@ -135,16 +135,19 @@ function RapidStrikeContainer() {
             style={hudBtnStyle(colors)}
             onClick={() => setShowWeaponMenu(true)}
             aria-label="Weapon Customization"
+            type="button"
           >⚒ Weapon</button>
           <button
             style={hudBtnStyle(colors)}
             onClick={() => setShowLeaderboard(true)}
             aria-label="Leaderboard"
+            type="button"
           >🏆 Leaderboard</button>
           <button
             style={hudBtnStyle(colors)}
             onClick={() => setShowSettings(true)}
             aria-label="Settings"
+            type="button"
           >⚙️</button>
         </div>
       </div>
@@ -175,21 +178,21 @@ function RapidStrikeContainer() {
       </div>
 
       {/* Overlay Menus */}
-      {showWeaponMenu &&
+      {showWeaponMenu && (
         <OverlayModal onClose={() => setShowWeaponMenu(false)} title="Weapon Customization">
           <div style={{ padding: 20, color: colors.primary, minWidth: 270 }}>
             <p>Weapon attachments, skins (Placeholder for customization feature)</p>
           </div>
         </OverlayModal>
-      }
-      {showLeaderboard &&
+      )}
+      {showLeaderboard && (
         <OverlayModal onClose={() => setShowLeaderboard(false)} title="Leaderboard">
           <div style={{ padding: 18, minWidth: 320 }}>
             <p>Leaderboard display goes here (feature placeholder).</p>
           </div>
         </OverlayModal>
-      }
-      {showSettings &&
+      )}
+      {showSettings && (
         <OverlayModal onClose={() => setShowSettings(false)} title="Settings">
           <div style={{ padding: 16 }}>
             <p>Settings menu (Placeholder).</p>
@@ -242,6 +245,7 @@ function OverlayModal({ children, onClose, title }) {
           }}
           onClick={onClose}
           aria-label="Close"
+          type="button"
         >✕</button>
         <div style={{ marginTop: 7 }}>
           {children}
