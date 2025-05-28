@@ -8,7 +8,7 @@ import * as THREE from "three";
  * Handles WASD movement and mouse look,
  * using react-three-fiber and PointerLockControls for pointer capture.
  */
-function FPSController({ movementSpeed = 8 }) {
+function FPSController({ movementSpeed = 4 }) { // Lower speed to realistic 3-5 units/sec (default 4)
   const { camera, gl } = useThree();
   const velocity = useRef(new THREE.Vector3());
   const direction = useRef(new THREE.Vector3());
@@ -81,7 +81,10 @@ function FPSController({ movementSpeed = 8 }) {
     velocity.current.z -= velocity.current.z * 8.0 * delta;
 
     direction.current.z = Number(move.current.forward) - Number(move.current.backward);
-    direction.current.x = Number(move.current.right) - Number(move.current.left);
+
+    // Invert strafe (x) direction logic so 'A' moves left, 'D' moves right (A = left = negative X)
+    // If strafe felt reversed, multiply by -1 here
+    direction.current.x = (Number(move.current.right) - Number(move.current.left)) * -1;
     direction.current.normalize(); // Ensure consistent movement
 
     if (move.current.forward || move.current.backward) {
@@ -94,7 +97,7 @@ function FPSController({ movementSpeed = 8 }) {
     // Move camera (locked to ground, y=1.75)
     camera.position.x += velocity.current.x;
     camera.position.z += velocity.current.z;
-    camera.position.y = 1.75;
+    camera.position.y = 1.75; // up/down is locked for this FPS demo (no jump/crouch)
 
     prevTime.current = time;
   });
