@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useCallback } from "react";
 import { Canvas, useThree, useFrame } from "@react-three/fiber";
-import { PointerLockControls, Sky, Environment } from "@react-three/drei";
+import { PointerLockControls, Sky } from "@react-three/drei";
 import * as THREE from "three";
 
 /**
@@ -150,7 +150,7 @@ export default function FPSCanvas() {
           shadow-mapSize-height={2048}
         />
         {/* Environment: subtle HDR or extra ambient */}
-        <Environment preset="city" background={false} />
+        {/* <Environment preset="city" background={false} /> */}
       </Canvas>
       {/* Subtle HUD crosshair */}
       <div style={{
