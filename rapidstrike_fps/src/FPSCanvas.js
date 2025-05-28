@@ -290,23 +290,74 @@ function FPSWeapon({ getCamera, targets, onTargetHit }) {
   );
 }
 
-// PUBLIC_INTERFACE
 /**
- * FPSCanvas renders the 3D environment and FPS controls, and now supports weapon firing.
+ * FPSCanvas renders the 3D environment and FPS controls, weapon/projectile system, 
+ * targets for hit detection training, and minimal interactive scene.
  */
 export default function FPSCanvas() {
-  // Acquire camera reference for weapon ambient logic (projectile spawn, view direction)
+  // Camera rig
   const cameraRef = useRef();
-  const getCamera = useCallback(() => {
-    return cameraRef.current;
-  }, []);
-  // CameraRig connects r3f's active camera to our ref
+  const getCamera = useCallback(() => cameraRef.current, []);
   const CameraRig = () => {
     const { camera } = useThree();
-    useEffect(() => {
-      cameraRef.current = camera;
-    }, [camera]);
+    useEffect(() => { cameraRef.current = camera; }, [camera]);
     return null;
+  };
+
+  // --- Target state for hit detection ---
+  // We'll have a few simple targets: each has id, position, size, hit state
+  const initialTargets = [
+    {
+      id: "targ1",
+      position: [0, 1.45, -8.5],
+      size: [1.1, 2.1, 0.42],
+      color: "#e7cf41"
+    },
+    {
+      id: "targ2",
+      position: [-4.5, 1.2, -7.4],
+      size: [1.6, 1.8, 0.5],
+      color: "#3fb7e6"
+    },
+    {
+      id: "targ3",
+      position: [3.9, 1.65, -6.2],
+      size: [1.2, 2.1, 0.5],
+      color: "#e85b7c"
+    },
+  ];
+  const [targets, setTargets] = useState(
+    () => initialTargets.map((t) => ({ ...t, hit: false, vanished: false }))
+  );
+
+  // FPSWeapon needs structured targets as objects with position(size) and hit callback.
+  const visibleTargets = targets
+    .filter(t => !t.vanished)
+    .map(t => ({
+      id: t.id,
+      position: new THREE.Vector3(...t.position),
+      size: new THREE.Vector3(...t.size),
+      color: t.color,
+      active: !t.hit && !t.vanished
+    }));
+
+  // On projectile hit, update target state (color changes green then vanishes after delay)
+  const handleTargetHit = (targetId) => {
+    setTargets(tgts =>
+      tgts.map(t =>
+        t.id === targetId && !t.hit
+          ? { ...t, hit: true }
+          : t
+      )
+    );
+    // After delay, vanish target
+    setTimeout(() => {
+      setTargets(tgts =>
+        tgts.map(t =>
+          t.id === targetId ? { ...t, vanished: true } : t
+        )
+      );
+    }, 650); // Show green for ~0.65s
   };
 
   return (
@@ -322,14 +373,30 @@ export default function FPSCanvas() {
         <Sky sunPosition={[100, 40, 100]} turbidity={8} rayleigh={6} mieCoefficient={0.015} />
         {/* FPS controller: WASD + mouse look */}
         <FPSController />
-        {/* Gun/projectile logic */}
-        <FPSWeapon getCamera={getCamera} />
+        {/* Targets */}
+        {targets.map(t =>
+          <FpsTarget
+            key={t.id}
+            id={t.id}
+            position={t.position}
+            size={t.size}
+            color={t.color}
+            onHit={handleTargetHit}
+            state={{ hit: t.hit, vanished: t.vanished }}
+          />
+        )}
+        {/* Gun/projectile logic, pass in visible targets for hit check */}
+        <FPSWeapon
+          getCamera={getCamera}
+          targets={visibleTargets}
+          onTargetHit={handleTargetHit}
+        />
         {/* Ground */}
         <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
           <planeGeometry args={[64, 64]} />
           <meshStandardMaterial color="#aaaaaa" roughness={0.83} metalness={0.11} />
         </mesh>
-        {/* Placeholder walls/boxes/objects */}
+        {/* Simple scene objects: obstacles/walls */}
         <mesh position={[0, 1, -5]} castShadow>
           <boxGeometry args={[2.5, 2, 2.5]} />
           <meshStandardMaterial color="#e63946" />
