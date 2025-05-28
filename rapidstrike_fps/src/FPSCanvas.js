@@ -99,31 +99,65 @@ function FPSController({ movementSpeed = 4 }) {
   return <PointerLockControls selector="#fps-canvas-root" />;
 }
 
-// --- FPS WEAPON FIRING SYSTEM ---
-
-/**
+/*
  * BulletProjectile renders a fast-moving bullet object from given start position and direction.
- * Handles its forward animation and removal when out of range.
- * Optionally, can include collision detection logic (future expansion).
+ * Handles forward animation, and now does hit detection against targets.
+ * onHit: callback(targetId) called when a hit occurs; targetId is the target hit, or null otherwise.
  */
-function BulletProjectile({ start, direction, speed = 21, life = 1.4, onExpire, color = "#ffd700" }) {
+function BulletProjectile({
+  start,
+  direction,
+  speed = 21,
+  life = 1.4,
+  onExpire,
+  color = "#ffd700",
+  targets = [],
+  onHit
+}) {
   const meshRef = useRef();
   const [alive, setAlive] = useState(true);
   const spawnTime = useRef(performance.now());
-
   const pos = useRef(new THREE.Vector3(...start));
   const dir = useRef(direction.clone());
+  const [alreadyHit, setAlreadyHit] = useState(false);
 
   useFrame(() => {
     if (!alive) return;
     const now = performance.now();
     const delta = (now - spawnTime.current) / 1000.0;
-
-    const move = dir.current.clone().normalize().multiplyScalar(speed * (1/60));
+    const move = dir.current.clone().normalize().multiplyScalar(speed * (1 / 60));
     pos.current.add(move);
 
+    // Move mesh position
     if (meshRef.current) {
       meshRef.current.position.copy(pos.current);
+    }
+
+    // Bullet-target hit detection (simple bounding sphere vs box)
+    if (!alreadyHit && Array.isArray(targets) && targets.length > 0) {
+      for (let t of targets) {
+        if (!t.active) continue;
+        // t.position: THREE.Vector3, t.size: THREE.Vector3
+        // Treat bullet as sphere, target as box.
+        const bulletRadius = 0.12;
+        const min = t.position.clone().sub(t.size.clone().multiplyScalar(0.5));
+        const max = t.position.clone().add(t.size.clone().multiplyScalar(0.5));
+        const p = pos.current;
+        // Clamp sphere center to box, then dist <= bulletRadius == hit
+        const clamped = new THREE.Vector3(
+          Math.max(min.x, Math.min(p.x, max.x)),
+          Math.max(min.y, Math.min(p.y, max.y)),
+          Math.max(min.z, Math.min(p.z, max.z))
+        );
+        const dist = clamped.distanceTo(p);
+        if (dist <= bulletRadius) {
+          setAlreadyHit(true);
+          setAlive(false);
+          if (onHit) onHit(t.id);
+          if (onExpire) onExpire();
+          return;
+        }
+      }
     }
 
     if (delta > life) {
