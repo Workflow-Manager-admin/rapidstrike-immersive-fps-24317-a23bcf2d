@@ -192,10 +192,27 @@ function MuzzleFlash({ show, position, direction }) {
 }
 
 /**
- * FPSWeapon handles weapon logic: firing projectiles, muzzle flash, and input controls.
- * Cleans up previous projectiles, supports click-to-fire and spacebar.
+ * Target objects for the FPS range, hit-detectable and provide visual feedback.
  */
-function FPSWeapon({ getCamera }) {
+function FpsTarget({ id, position, size = [1, 2, 1], color = "#e7cf41", onHit, state }) {
+  // state: { hit: boolean, vanished: boolean }
+  let meshColor = color;
+  if (state?.vanished) return null;
+  else if (state?.hit) meshColor = "#62fb40";
+
+  return (
+    <mesh position={position} castShadow={true}>
+      <boxGeometry args={size} />
+      <meshStandardMaterial color={meshColor} emissive={state?.hit ? "#7fff70" : color} opacity={state?.hit ? 0.96 : 1}/>
+    </mesh>
+  );
+}
+
+/**
+ * FPSWeapon handles weapon logic: firing projectiles, muzzle flash, and input controls,
+ * and emits projectiles with knowledge of possible targets for hit detection.
+ */
+function FPSWeapon({ getCamera, targets, onTargetHit }) {
   const [projectiles, setProjectiles] = useState([]);
   const [muzzleFlash, setMuzzleFlash] = useState(false);
 
@@ -242,6 +259,10 @@ function FPSWeapon({ getCamera }) {
     setProjectiles(arr => arr.filter(p => p.key !== k));
   };
 
+  const handleProjectileHit = (targetId) => {
+    if (targetId != null && typeof onTargetHit === "function") onTargetHit(targetId);
+  };
+
   const { camera } = useThree();
 
   return (
@@ -252,6 +273,8 @@ function FPSWeapon({ getCamera }) {
           start={proj.start}
           direction={proj.direction}
           onExpire={() => onProjectileExpire(proj.key)}
+          targets={targets}
+          onHit={handleProjectileHit}
         />
       )}
       <MuzzleFlash
