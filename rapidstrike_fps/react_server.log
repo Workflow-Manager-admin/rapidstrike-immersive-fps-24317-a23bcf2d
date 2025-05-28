@@ -32,3 +32,16 @@ Module Warning (from ./node_modules/source-map-loader/dist/cjs.js):
 Failed to parse source map from '/home/kavia/workspace/code-generation/rapidstrike-immersive-fps-24317-a23bcf2d/rapidstrike_fps/node_modules/@mediapipe/tasks-vision/vision_bundle_mjs.js.map' file: Error: ENOENT: no such file or directory, open '/home/kavia/workspace/code-generation/rapidstrike-immersive-fps-24317-a23bcf2d/rapidstrike_fps/node_modules/@mediapipe/tasks-vision/vision_bundle_mjs.js.map'
 
 webpack compiled with 1 warning
+Compiling...
+Compiled with warnings.
+
+Failed to parse source map from '/home/kavia/workspace/code-generation/rapidstrike-immersive-fps-24317-a23bcf2d/rapidstrike_fps/node_modules/@mediapipe/tasks-vision/vision_bundle_mjs.js.map' file: Error: ENOENT: no such file or directory, open '/home/kavia/workspace/code-generation/rapidstrike-immersive-fps-24317-a23bcf2d/rapidstrike_fps/node_modules/@mediapipe/tasks-vision/vision_bundle_mjs.js.map'
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in ./node_modules/@mediapipe/tasks-vision/vision_bundle.mjs
+Module Warning (from ./node_modules/source-map-loader/dist/cjs.js):
+Failed to parse source map from '/home/kavia/workspace/code-generation/rapidstrike-immersive-fps-24317-a23bcf2d/rapidstrike_fps/node_modules/@mediapipe/tasks-vision/vision_bundle_mjs.js.map' file: Error: ENOENT: no such file or directory, open '/home/kavia/workspace/code-generation/rapidstrike-immersive-fps-24317-a23bcf2d/rapidstrike_fps/node_modules/@mediapipe/tasks-vision/vision_bundle_mjs.js.map'
+
+webpack compiled with 1 warning

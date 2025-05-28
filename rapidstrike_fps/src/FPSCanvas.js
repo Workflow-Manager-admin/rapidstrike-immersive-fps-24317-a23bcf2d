@@ -402,6 +402,88 @@ export default function FPSCanvas() {
     }, 650); // Show green for ~0.65s
   };
 
+  // === Ammo management logic ===
+  // We'll use: maxAmmo (magazine cap), reserveAmmo (left), ammo (in mag)
+  const MAX_MAG_AMMO = 18;
+  const [ammo, setAmmo] = useState(MAX_MAG_AMMO);
+  const [reserveAmmo, setReserveAmmo] = useState(54); // Start: 3 full mags
+  const [isReloading, setIsReloading] = useState(false);
+
+  // Handles updates from weapon logic
+  const handleAmmoChange = (newAmmo, newReserve) => {
+    // Clamp ammo values, no negative ammo
+    setAmmo(Math.max(0, Math.min(MAX_MAG_AMMO, newAmmo)));
+    setReserveAmmo(Math.max(0, newReserve));
+  };
+
+  // Show HUD for ammo state
+  const AmmoHud = () => (
+    <div
+      style={{
+        position: "absolute",
+        bottom: 33,
+        right: 38,
+        background: "rgba(24,24,27,0.93)",
+        color: "#FFF",
+        padding: "14px 33px 12px 21px",
+        borderRadius: 10,
+        fontWeight: 700,
+        fontSize: "1.22rem",
+        letterSpacing: 1.1,
+        minWidth: 124,
+        boxShadow: "0 7px 30px rgba(24,24,22,0.19)",
+        zIndex: 80,
+        userSelect: "none",
+        border: "1.5px solid #e63946"
+      }}>
+      <span style={{
+        color: ammo === 0 ? "#e63946" : "#FFF",
+        fontSize: "2.1rem",
+        fontWeight: 800,
+        letterSpacing: 0.2,
+      }}>{String(ammo).padStart(2, ' ')}</span>
+      <span style={{ color: "#FFF" }}>/</span>
+      <span style={{
+        fontWeight: 700,
+        color: "#f3c541",
+        fontSize: "1.45rem",
+        marginLeft: 3,
+        letterSpacing: 0.6,
+      }}>{String(reserveAmmo).padStart(2, ' ')}</span>
+      <span style={{
+        marginLeft: 11,
+        color: isReloading ? "#e63946" : "#69f269",
+        fontWeight: 600,
+        fontSize: "1.05rem"
+      }}>{isReloading ? "RELOADING..." : "  "}</span>
+    </div>
+  );
+
+  // Show reload hint HUD if empty
+  const ReloadHint = () => (
+    ammo === 0 && !isReloading && reserveAmmo > 0 ? (
+      <div style={{
+        position: "absolute",
+        bottom: 87,
+        right: 46,
+        background: "rgba(250,54,54,0.93)",
+        color: "#fff",
+        padding: "11px 24px",
+        borderRadius: 9,
+        fontWeight: 600,
+        fontSize: "1.03rem",
+        letterSpacing: 1.1,
+        minWidth: 90,
+        boxShadow: "0 3px 19px #8a242440",
+        zIndex: 82,
+        userSelect: "none",
+        border: "1.5px solid #e63946"
+      }}>
+        OUT OF AMMO<br /><span style={{ fontWeight: 700, color: "#fff44b" }}>Press R to Reload</span>
+      </div>
+    ) : null
+  );
+
   return (
     <div id="fps-canvas-root" style={{width: "100vw", height: "100vh", position: "absolute", inset: 0, zIndex: 1 }}>
       <Canvas
@@ -432,6 +514,12 @@ export default function FPSCanvas() {
           getCamera={getCamera}
           targets={visibleTargets}
           onTargetHit={handleTargetHit}
+          ammo={ammo}
+          maxAmmo={MAX_MAG_AMMO}
+          reserveAmmo={reserveAmmo}
+          onAmmoChange={handleAmmoChange}
+          isReloading={isReloading}
+          setIsReloading={setIsReloading}
         />
         {/* Ground */}
         <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
@@ -463,6 +551,9 @@ export default function FPSCanvas() {
         {/* Environment: subtle HDR or extra ambient */}
         {/* <Environment preset="city" background={false} /> */}
       </Canvas>
+      {/* AMMO HUD (bottom right corner) */}
+      <AmmoHud />
+      <ReloadHint />
       {/* Subtle HUD crosshair */}
       <div style={{
         position: "absolute",
