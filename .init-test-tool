@@ -1,0 +1,4 @@
+{
+    "command": "npm run test",
+    "working_directory": "/home/kavia/workspace/code-generation/rapidstrike-immersive-fps-24317-a23bcf2d/rapidstrike_fps"
+}
