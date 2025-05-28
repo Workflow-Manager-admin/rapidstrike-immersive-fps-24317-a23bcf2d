@@ -484,6 +484,171 @@ export default function FPSCanvas() {
     ) : null
   );
 
+  // === Player Health State and Damage Logic ===
+  const MAX_PLAYER_HEALTH = 100;
+  const [playerHealth, setPlayerHealth] = useState(MAX_PLAYER_HEALTH);
+  const [isDead, setIsDead] = useState(false);
+  const [respawnTimer, setRespawnTimer] = useState(0);
+
+  // Handle periodic or target-based damage
+  // Periodic check for targets that can "fire back" (simulate environment danger)
+  useEffect(() => {
+    if (isDead) return;
+    const damageInterval = setInterval(() => {
+      let activeTargetCount = visibleTargets.filter(t => t.active).length;
+      if (activeTargetCount > 0) {
+        // Take damage over time when any active targets remain
+        setPlayerHealth(h => {
+          const next = Math.max(0, h - 3 * activeTargetCount); // -3HP per active target
+          if (next === 0) setIsDead(true);
+          return next;
+        });
+      } else {
+        // If no targets, no damage
+      }
+    }, 1400); // Damage every 1.4 seconds
+
+    return () => {
+      clearInterval(damageInterval);
+    };
+  }, [visibleTargets, isDead]);
+
+  // Also, take a little penalty if all ammo is out and no reload possible (simulate danger)
+  useEffect(() => {
+    if (isDead) return;
+    if (ammo === 0 && reserveAmmo === 0) {
+      // Take a chunk of damage when totally helpless (once-off)
+      setPlayerHealth(h => Math.max(0, h - 11));
+      if (playerHealth - 11 <= 0) setIsDead(true);
+    }
+    // eslint-disable-next-line
+  }, [ammo, reserveAmmo]);
+
+  // If killed, show respawn menu after short delay
+  useEffect(() => {
+    let resTimer;
+    if (isDead) {
+      setRespawnTimer(3); // show respawn countdown
+      resTimer = setInterval(() => {
+        setRespawnTimer(sec => {
+          if (sec > 1) return sec - 1;
+          else {
+            clearInterval(resTimer);
+            return 0;
+          }
+        });
+      }, 800);
+    }
+    return () => clearInterval(resTimer);
+  }, [isDead]);
+
+  // Player respawn/restart handler
+  // PUBLIC_INTERFACE
+  function handleRespawn() {
+    setPlayerHealth(MAX_PLAYER_HEALTH);
+    setIsDead(false);
+    setRespawnTimer(0);
+    // Reset targets
+    setTargets(() => initialTargets.map((t) => ({ ...t, hit: false, vanished: false })));
+    // Restore ammo
+    setAmmo(MAX_MAG_AMMO);
+    setReserveAmmo(54);
+    setIsReloading(false);
+  }
+
+  // Health HUD (top left)
+  const HealthHud = () => (
+    <div
+      style={{
+        position: "absolute",
+        top: 30,
+        left: 35,
+        background: "rgba(30,30,32,0.94)",
+        color: "#fff",
+        padding: "13px 23px 11px 17px",
+        borderRadius: 10,
+        fontWeight: 700,
+        fontSize: "1.09rem",
+        letterSpacing: 1.1,
+        minWidth: 145,
+        zIndex: 90,
+        userSelect: "none",
+        border: "1.5px solid #e63946",
+        boxShadow: "0 7px 19px 0 rgba(24,24,22,0.19)"
+      }}>
+      <span style={{
+        fontWeight: 800,
+        color: playerHealth === 0 ? "#e63946" : "#f3c541",
+        fontSize: "1.44rem",
+      }}>{playerHealth}</span>
+      <span style={{
+        color: "#fff",
+        fontWeight: 600,
+        fontSize: "1.17rem",
+        marginLeft: 4
+      }}>/ {MAX_PLAYER_HEALTH}</span>
+      <span style={{
+        marginLeft: 13,
+        color: playerHealth < (MAX_PLAYER_HEALTH/2) ? "#e63946" : "#69f269",
+        fontWeight: 600,
+        fontSize: "1.02rem"
+      }}>
+        {playerHealth < (MAX_PLAYER_HEALTH/2) ? "INJURED" : "HEALTH"}
+      </span>
+    </div>
+  );
+
+  // Player Dead overlay and respawn option
+  const RespawnOverlay = () => (isDead ? (
+    <div style={{
+      position: "fixed",
+      left: 0, top: 0, width: "100vw", height: "100vh",
+      background: "rgba(30,5,8,0.85)",
+      zIndex: 200,
+      color: "#fff",
+      display: "flex", flexDirection: "column",
+      alignItems: "center", justifyContent: "center"
+    }}>
+      <div style={{
+        background: "#221717",
+        padding: "34px 38px 21px 38px",
+        borderRadius: "13px",
+        border: "3px solid #e63946",
+        textAlign: "center",
+        minWidth: 310,
+        minHeight: 80,
+        boxShadow: "0 7px 38px #1a010177"
+      }}>
+        <span style={{ color: "#e63946", fontWeight: 700, fontSize: "2.1rem" }}>You Died</span>
+        <div style={{
+          marginTop: 12,
+          fontWeight: 500,
+          fontSize: "1.16rem",
+          color: "#fff"
+        }}>
+          {respawnTimer > 0
+            ? <>Respawn available in <span style={{ color: "#ffd500" }}>{respawnTimer}</span>...</>
+            : <button
+                style={{
+                  marginTop: 16,
+                  padding: "12px 28px",
+                  fontWeight: 800,
+                  fontSize: "1.13rem",
+                  borderRadius: 7,
+                  border: "2px solid #f39d41",
+                  background: "#e63946",
+                  color: "#fff",
+                  cursor: "pointer",
+                  boxShadow: "0 2px 9px #8c1a1a33"
+                }}
+                onClick={handleRespawn}
+              >Respawn / Restart</button>
+          }
+        </div>
+      </div>
+    </div>
+  ) : null);
+
   return (
     <div id="fps-canvas-root" style={{width: "100vw", height: "100vh", position: "absolute", inset: 0, zIndex: 1 }}>
       <Canvas
@@ -510,17 +675,19 @@ export default function FPSCanvas() {
           />
         )}
         {/* Gun/projectile logic, pass in visible targets for hit check */}
-        <FPSWeapon
-          getCamera={getCamera}
-          targets={visibleTargets}
-          onTargetHit={handleTargetHit}
-          ammo={ammo}
-          maxAmmo={MAX_MAG_AMMO}
-          reserveAmmo={reserveAmmo}
-          onAmmoChange={handleAmmoChange}
-          isReloading={isReloading}
-          setIsReloading={setIsReloading}
-        />
+        {!isDead && (
+          <FPSWeapon
+            getCamera={getCamera}
+            targets={visibleTargets}
+            onTargetHit={handleTargetHit}
+            ammo={ammo}
+            maxAmmo={MAX_MAG_AMMO}
+            reserveAmmo={reserveAmmo}
+            onAmmoChange={handleAmmoChange}
+            isReloading={isReloading}
+            setIsReloading={setIsReloading}
+          />
+        )}
         {/* Ground */}
         <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
           <planeGeometry args={[64, 64]} />
@@ -551,9 +718,12 @@ export default function FPSCanvas() {
         {/* Environment: subtle HDR or extra ambient */}
         {/* <Environment preset="city" background={false} /> */}
       </Canvas>
+      {/* Player Health HUD (top-left) */}
+      <HealthHud />
       {/* AMMO HUD (bottom right corner) */}
       <AmmoHud />
       <ReloadHint />
+      <RespawnOverlay />
       {/* Subtle HUD crosshair */}
       <div style={{
         position: "absolute",
@@ -573,26 +743,28 @@ export default function FPSCanvas() {
         </svg>
       </div>
       {/* Prompt to click for pointer lock */}
-      <div style={{
-        position: "absolute",
-        left: "50%",
-        top: "52%",
-        minWidth: 160,
-        color: "#fff",
-        background: "rgba(24,24,26,0.88)",
-        padding: "14px 22px",
-        borderRadius: 12,
-        textAlign: "center",
-        fontWeight: 500,
-        fontSize: "1.08rem",
-        transform: "translate(-50%, -50%)",
-        pointerEvents: "none",
-        opacity: 0.32,
-        userSelect: "none"
-      }}
-      >
-        Click to Enable Mouse Look (Pointer Lock)
-      </div>
+      {!isDead && (
+        <div style={{
+          position: "absolute",
+          left: "50%",
+          top: "52%",
+          minWidth: 160,
+          color: "#fff",
+          background: "rgba(24,24,26,0.88)",
+          padding: "14px 22px",
+          borderRadius: 12,
+          textAlign: "center",
+          fontWeight: 500,
+          fontSize: "1.08rem",
+          transform: "translate(-50%, -50%)",
+          pointerEvents: "none",
+          opacity: 0.32,
+          userSelect: "none"
+        }}
+        >
+          Click to Enable Mouse Look (Pointer Lock)
+        </div>
+      )}
     </div>
   );
 }
